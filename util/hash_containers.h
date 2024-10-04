@@ -32,19 +32,19 @@ using UnorderedSet = folly::F14FastSet<K>;
 
 #else
 
-#include <unordered_map>
-#include <unordered_set>
+#include <absl/container/flat_hash_map.h>
+#include <absl/container/flat_hash_set.h>
 
 namespace ROCKSDB_NAMESPACE {
 
 template <typename K, typename V>
-using UnorderedMap = std::unordered_map<K, V>;
+using UnorderedMap = absl::flat_hash_map<K, V>;
 
 template <typename K, typename V, typename H>
-using UnorderedMapH = std::unordered_map<K, V, H>;
+using UnorderedMapH = absl::flat_hash_map<K, V, H>;
 
 template <typename K>
-using UnorderedSet = std::unordered_set<K>;
+using UnorderedSet = absl::flat_hash_set<K>;
 
 }  // namespace ROCKSDB_NAMESPACE
 

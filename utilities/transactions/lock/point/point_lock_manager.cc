@@ -957,6 +957,7 @@ void PointLockManager::UnLock(PessimisticTransaction* txn,
 
 void PointLockManager::UnLock(PessimisticTransaction* txn,
                               const LockTracker& tracker, Env* env) {
+  UnorderedMap<size_t, std::vector<const std::string*>> keys_by_stripe;
   std::unique_ptr<LockTracker::ColumnFamilyIterator> cf_it(
       tracker.GetColumnFamilyIterator());
   assert(cf_it != nullptr);
@@ -970,15 +971,20 @@ void PointLockManager::UnLock(PessimisticTransaction* txn,
     }
 
     // Bucket keys by lock_map_ stripe
-    UnorderedMap<size_t, std::vector<const std::string*>> keys_by_stripe(
-        lock_map->num_stripes_);
+    // TODO(mbkkt) compare it with recreating
+    keys_by_stripe.clear();
+    keys_by_stripe.reserve(lock_map->num_stripes_);
     std::unique_ptr<LockTracker::KeyIterator> key_it(
         tracker.GetKeyIterator(cf));
     assert(key_it != nullptr);
     while (key_it->HasNext()) {
       const std::string& key = key_it->Next();
       size_t stripe_num = lock_map->GetStripe(key);
-      keys_by_stripe[stripe_num].push_back(&key);
+      auto& target = keys_by_stripe[stripe_num];
+      if (target.empty()) {
+        target.reserve(8);
+      }
+      target.push_back(&key);
     }
 
     // For each stripe, grab the stripe mutex and unlock all keys in this stripe
