@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <absl/container/flat_hash_map.h>
+
 #include <cstddef>
 #include <unordered_map>
 #ifdef USE_FOLLY
@@ -26,6 +28,13 @@ size_t ApproximateMemoryUsage(
          (sizeof(typename Map::value_type) + sizeof(void*)) * umap.size() +
          // Size of hash buckets.
          umap.bucket_count() * sizeof(void*);
+}
+
+template <class Key, class Value, class Hash>
+size_t ApproximateMemoryUsage(
+    const absl::flat_hash_map<Key, Value, Hash>& umap) {
+  return sizeof(umap) +
+         (sizeof(std::pair<const Key, Value>) + 1) * umap.bucket_count();
 }
 
 #ifdef USE_FOLLY

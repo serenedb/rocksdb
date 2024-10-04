@@ -5,6 +5,9 @@
 
 #pragma once
 
+#include <absl/container/flat_hash_map.h>
+#include <absl/container/node_hash_map.h>
+
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -33,9 +36,9 @@ struct TrackedKeyInfo {
   }
 };
 
-using TrackedKeyInfos = std::unordered_map<std::string, TrackedKeyInfo>;
+using TrackedKeyInfos = absl::node_hash_map<std::string, TrackedKeyInfo>;
 
-using TrackedKeys = std::unordered_map<ColumnFamilyId, TrackedKeyInfos>;
+using TrackedKeys = absl::flat_hash_map<ColumnFamilyId, TrackedKeyInfos>;
 
 // Tracks point locks on single keys.
 class PointLockTracker : public LockTracker {
