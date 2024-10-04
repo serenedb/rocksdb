@@ -267,7 +267,7 @@ Status BlobFile::ReadMetadata(const std::shared_ptr<FileSystem>& fs,
     assert(!footer_valid_);
     return Status::OK();
   }
-  std::string footer_buf;
+  std::array<char, BlobLogFooter::kSize + 1> footer_buf;
   Slice footer_slice;
   // TODO: rate limit reading footers from blob files.
   if (file_reader->use_direct_io()) {
@@ -275,7 +275,6 @@ Status BlobFile::ReadMetadata(const std::shared_ptr<FileSystem>& fs,
                           BlobLogFooter::kSize, &footer_slice, nullptr,
                           &aligned_buf);
   } else {
-    footer_buf.reserve(BlobLogFooter::kSize);
     s = file_reader->Read(IOOptions(), file_size - BlobLogFooter::kSize,
                           BlobLogFooter::kSize, &footer_slice,
                           footer_buf.data(), nullptr);

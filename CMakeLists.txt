@@ -71,6 +71,8 @@ if(POLICY CMP0042)
   cmake_policy(SET CMP0042 NEW)
 endif()
 
+include(${CMAKE_CURRENT_SOURCE_DIR}/serenedb.cmake)
+
 if(NOT CMAKE_BUILD_TYPE)
   if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
     set(default_build_type "Debug")
@@ -121,9 +123,9 @@ else()
     set(WITH_JEMALLOC ON)
   else()
     if(WITH_JEMALLOC)
-      find_package(JeMalloc REQUIRED)
       add_definitions(-DROCKSDB_JEMALLOC -DJEMALLOC_NO_DEMANGLE)
-      list(APPEND THIRDPARTY_LIBS JeMalloc::JeMalloc)
+      include_directories(${JEMALLOC_INCLUDE_DIR})
+      list(APPEND THIRDPARTY_LIBS ${JEMALLOC_LIBRARIES})
     endif()
   endif()
 
@@ -160,12 +162,9 @@ else()
   endif()
 
   if(WITH_SNAPPY)
-    find_package(Snappy CONFIG)
-    if(NOT Snappy_FOUND)
-      find_package(Snappy REQUIRED)
-    endif()
     add_definitions(-DSNAPPY)
-    list(APPEND THIRDPARTY_LIBS Snappy::snappy)
+    include_directories(${SNAPPY_INCLUDE_DIR})
+    list(APPEND THIRDPARTY_LIBS ${SNAPPY_LIBRARIES})
   endif()
 
   if(WITH_ZLIB)
@@ -187,9 +186,9 @@ else()
   endif()
 
   if(WITH_LZ4)
-    find_package(lz4 REQUIRED)
     add_definitions(-DLZ4)
-    list(APPEND THIRDPARTY_LIBS lz4::lz4)
+    include_directories(${LZ4_INCLUDE_DIR})
+    list(APPEND THIRDPARTY_LIBS lz4_static)
   endif()
 
   if(WITH_ZSTD)
@@ -224,7 +223,7 @@ if(MSVC)
     message(STATUS "Setting /DNDEBUG as CMAKE_BUILD_TYPE is set to ${CMAKE_BUILD_TYPE}")
   endif()
 else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wextra -Wall -pthread")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wextra -Wall")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wsign-compare -Wshadow -Wno-unused-parameter -Wno-unused-variable -Woverloaded-virtual -Wnon-virtual-dtor -Wno-missing-field-initializers -Wno-strict-aliasing -Wno-invalid-offsetof")
   if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wstrict-prototypes")
@@ -340,6 +339,7 @@ int main() {
   return 0;
 }
 " BUILTIN_ATOMIC)
+  set(BUILTIN_ATOMIC ON)
   if (NOT BUILTIN_ATOMIC)
     #TODO: Check if -latomic exists
     list(APPEND THIRDPARTY_LIBS atomic)
@@ -1191,6 +1191,8 @@ target_include_directories(${ROCKSDB_STATIC_LIB} PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 target_link_libraries(${ROCKSDB_STATIC_LIB} PRIVATE
   ${THIRDPARTY_LIBS} ${SYSTEM_LIBS})
+target_link_libraries(${ROCKSDB_STATIC_LIB} PRIVATE
+  absl::flat_hash_set absl::flat_hash_map absl::node_hash_map)
 
 if(ROCKSDB_BUILD_SHARED)
   add_library(${ROCKSDB_SHARED_LIB} SHARED ${SOURCES} ${BUILD_VERSION_CC})
@@ -1285,6 +1287,7 @@ if(NOT WIN32 OR ROCKSDB_INSTALL_ON_WINDOWS)
 
   install(DIRECTORY "${PROJECT_SOURCE_DIR}/cmake/modules" COMPONENT devel DESTINATION ${package_config_destination})
 
+  #[[ intentional deviation
   install(
     TARGETS ${ROCKSDB_STATIC_LIB}
     EXPORT RocksDBTargets
@@ -1311,6 +1314,7 @@ if(NOT WIN32 OR ROCKSDB_INSTALL_ON_WINDOWS)
     DESTINATION ${package_config_destination}
     NAMESPACE RocksDB::
   )
+  ]]# intentional deviation
 
   install(
     FILES

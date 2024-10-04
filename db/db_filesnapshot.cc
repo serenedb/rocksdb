@@ -451,9 +451,14 @@ Status DBImpl::GetLiveFilesStorageInfo(
   // that has changes after the last flush.
   auto wal_dir = immutable_db_options_.GetWalDir();
   for (size_t i = 0; s.ok() && i < wal_count; ++i) {
-    if ((live_wal_files[i]->Type() == kAliveLogFile) &&
-        (!flush_memtable || live_wal_files[i]->LogNumber() >= min_log_num) &&
-        live_wal_files[i]->LogNumber() <= max_log_num) {
+    auto const include_file = [&] {
+      if (opts.include_all_wal_files) {
+        return true;
+      }
+      return (live_wal_files[i]->Type() == kAliveLogFile) &&
+             (!flush_memtable || live_wal_files[i]->LogNumber() >= min_log_num);
+    }();
+    if (include_file && live_wal_files[i]->LogNumber() <= max_log_num) {
       results.emplace_back();
       LiveFileStorageInfo& info = results.back();
       auto f = live_wal_files[i]->PathName();

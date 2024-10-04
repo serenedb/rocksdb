@@ -19,6 +19,12 @@ class ColumnFamilyHandle;
 struct LiveFileMetaData;
 struct ExportImportFilesMetaData;
 
+struct CreateCheckpointOptions {
+  uint64_t log_size_for_flush = 0;
+  uint64_t* sequence_number_ptr = nullptr;
+  bool include_all_wal_files = false;
+};
+
 class Checkpoint {
  public:
   // Creates a Checkpoint object to be used for creating openable snapshots
@@ -48,6 +54,8 @@ class Checkpoint {
   virtual Status CreateCheckpoint(const std::string& checkpoint_dir,
                                   uint64_t log_size_for_flush = 0,
                                   uint64_t* sequence_number_ptr = nullptr);
+  virtual Status CreateCheckpoint(const std::string& checkpoint_dir,
+                                  const CreateCheckpointOptions& opts);
 
   // Exports all live SST files of a specified Column Family onto export_dir,
   // returning SST files information in metadata.

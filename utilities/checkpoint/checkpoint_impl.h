@@ -18,8 +18,7 @@ class CheckpointImpl : public Checkpoint {
   explicit CheckpointImpl(DB* db) : db_(db) {}
 
   Status CreateCheckpoint(const std::string& checkpoint_dir,
-                          uint64_t log_size_for_flush,
-                          uint64_t* sequence_number_ptr) override;
+                          const CreateCheckpointOptions&) override;
 
   Status ExportColumnFamily(ColumnFamilyHandle* handle,
                             const std::string& export_dir,
@@ -41,7 +40,7 @@ class CheckpointImpl : public Checkpoint {
                            const std::string& contents, FileType type)>
           create_file_cb,
       uint64_t* sequence_number, uint64_t log_size_for_flush,
-      bool get_live_table_checksum = false);
+      bool include_all_wal_files, bool get_live_table_checksum = false);
 
  private:
   Status CleanStagingDirectory(const std::string& path, Logger* info_log);
