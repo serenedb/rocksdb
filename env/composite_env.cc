@@ -124,18 +124,19 @@ class CompositeWritableFileWrapper : public WritableFile {
     IODebugContext dbg;
     return target_->Append(data, io_opts, verification_info, &dbg);
   }
-  Status PositionedAppend(const Slice& data, uint64_t offset) override {
+  Status PositionedAppend(size_t prefix, const Slice& data,
+                          uint64_t offset) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->PositionedAppend(data, offset, io_opts, &dbg);
+    return target_->PositionedAppend(prefix, data, offset, io_opts, &dbg);
   }
   Status PositionedAppend(
-      const Slice& data, uint64_t offset,
+      size_t prefix, const Slice& data, uint64_t offset,
       const DataVerificationInfo& verification_info) override {
     IOOptions io_opts;
     IODebugContext dbg;
-    return target_->PositionedAppend(data, offset, io_opts, verification_info,
-                                     &dbg);
+    return target_->PositionedAppend(prefix, data, offset, io_opts,
+                                     verification_info, &dbg);
   }
   Status Truncate(uint64_t size) override {
     IOOptions io_opts;

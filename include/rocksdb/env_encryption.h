@@ -271,7 +271,7 @@ class EncryptedWritableFile : public FSWritableFile {
                   IODebugContext* dbg) override;
 
   using FSWritableFile::PositionedAppend;
-  IOStatus PositionedAppend(const Slice& data, uint64_t offset,
+  IOStatus PositionedAppend(size_t prefix, const Slice& data, uint64_t offset,
                             const IOOptions& options,
                             IODebugContext* dbg) override;
 

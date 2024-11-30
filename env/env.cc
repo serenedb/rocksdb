@@ -250,16 +250,16 @@ class LegacyWritableFileWrapper : public FSWritableFile {
                   IODebugContext* /*dbg*/) override {
     return status_to_io_status(target_->Append(data));
   }
-  IOStatus PositionedAppend(const Slice& data, uint64_t offset,
+  IOStatus PositionedAppend(size_t prefix, const Slice& data, uint64_t offset,
                             const IOOptions& /*options*/,
                             IODebugContext* /*dbg*/) override {
-    return status_to_io_status(target_->PositionedAppend(data, offset));
+    return status_to_io_status(target_->PositionedAppend(prefix, data, offset));
   }
-  IOStatus PositionedAppend(const Slice& data, uint64_t offset,
+  IOStatus PositionedAppend(size_t prefix, const Slice& data, uint64_t offset,
                             const IOOptions& /*options*/,
                             const DataVerificationInfo& /*verification_info*/,
                             IODebugContext* /*dbg*/) override {
-    return status_to_io_status(target_->PositionedAppend(data, offset));
+    return status_to_io_status(target_->PositionedAppend(prefix, data, offset));
   }
   IOStatus Truncate(uint64_t size, const IOOptions& /*options*/,
                     IODebugContext* /*dbg*/) override {
