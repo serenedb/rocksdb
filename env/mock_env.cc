@@ -397,8 +397,8 @@ class MockWritableFile : public FSWritableFile {
   }
 
   using FSWritableFile::PositionedAppend;
-  IOStatus PositionedAppend(const Slice& data, uint64_t /*offset*/,
-                            const IOOptions& options,
+  IOStatus PositionedAppend(size_t /*prefix*/, const Slice& data,
+                            uint64_t /*offset*/, const IOOptions& options,
                             IODebugContext* dbg) override {
     assert(use_direct_io_);
     return Append(data, options, dbg);
