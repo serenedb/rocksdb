@@ -84,13 +84,14 @@ class TestWritableFile : public WritableFile {
   Status Flush() override;
   Status Sync() override;
   bool IsSyncThreadSafe() const override { return true; }
-  Status PositionedAppend(const Slice& data, uint64_t offset) override {
-    return target_->PositionedAppend(data, offset);
+  Status PositionedAppend(size_t prefix, const Slice& data,
+                          uint64_t offset) override {
+    return target_->PositionedAppend(prefix, data, offset);
   }
   Status PositionedAppend(
-      const Slice& data, uint64_t offset,
+      size_t prefix, const Slice& data, uint64_t offset,
       const DataVerificationInfo& /*verification_info*/) override {
-    return PositionedAppend(data, offset);
+    return PositionedAppend(prefix, data, offset);
   }
   bool use_direct_io() const override { return target_->use_direct_io(); }
   uint64_t GetFileSize() final { return target_->GetFileSize(); }

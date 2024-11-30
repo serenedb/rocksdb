@@ -1075,7 +1075,7 @@ class WritableFile {
   //
   // PositionedAppend() requires aligned buffer to be passed in. The alignment
   // required is queried via GetRequiredBufferAlignment()
-  virtual Status PositionedAppend(const Slice& /* data */,
+  virtual Status PositionedAppend(size_t /* prefix */, const Slice& /* data */,
                                   uint64_t /* offset */) {
     return Status::NotSupported(
         "WritableFile::PositionedAppend() not supported.");
@@ -1089,7 +1089,7 @@ class WritableFile {
   // WritableFile, the information in DataVerificationInfo can be ignored
   // (i.e. does not perform checksum verification).
   virtual Status PositionedAppend(
-      const Slice& /* data */, uint64_t /* offset */,
+      size_t /* prefix */, const Slice& /* data */, uint64_t /* offset */,
       const DataVerificationInfo& /* verification_info */) {
     return Status::NotSupported("PositionedAppend");
   }
@@ -1908,13 +1908,14 @@ class WritableFileWrapper : public WritableFile {
                 const DataVerificationInfo& verification_info) override {
     return target_->Append(data, verification_info);
   }
-  Status PositionedAppend(const Slice& data, uint64_t offset) override {
-    return target_->PositionedAppend(data, offset);
+  Status PositionedAppend(size_t prefix, const Slice& data,
+                          uint64_t offset) override {
+    return target_->PositionedAppend(prefix, data, offset);
   }
   Status PositionedAppend(
-      const Slice& data, uint64_t offset,
+      size_t prefix, const Slice& data, uint64_t offset,
       const DataVerificationInfo& verification_info) override {
-    return target_->PositionedAppend(data, offset, verification_info);
+    return target_->PositionedAppend(prefix, data, offset, verification_info);
   }
   Status Truncate(uint64_t size) override { return target_->Truncate(size); }
   Status Close() override { return target_->Close(); }

@@ -163,7 +163,8 @@ IOStatus EncryptedWritableFile::Append(const Slice& data,
   return file_->Append(dataToAppend, options, dbg);
 }
 
-IOStatus EncryptedWritableFile::PositionedAppend(const Slice& data,
+IOStatus EncryptedWritableFile::PositionedAppend(size_t prefix,
+                                                 const Slice& data,
                                                  uint64_t offset,
                                                  const IOOptions& options,
                                                  IODebugContext* dbg) {
@@ -187,7 +188,7 @@ IOStatus EncryptedWritableFile::PositionedAppend(const Slice& data,
     }
     dataToAppend = Slice(buf.BufferStart(), buf.CurrentSize());
   }
-  return file_->PositionedAppend(dataToAppend, offset, options, dbg);
+  return file_->PositionedAppend(prefix, dataToAppend, offset, options, dbg);
 }
 
 bool EncryptedWritableFile::use_direct_io() const {
