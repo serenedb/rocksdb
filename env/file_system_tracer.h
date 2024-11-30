@@ -311,14 +311,14 @@ class FSWritableFileTracingWrapper : public FSWritableFileOwnerWrapper {
     return Append(data, options, dbg);
   }
 
-  IOStatus PositionedAppend(const Slice& data, uint64_t offset,
+  IOStatus PositionedAppend(size_t prefix, const Slice& data, uint64_t offset,
                             const IOOptions& options,
                             IODebugContext* dbg) override;
-  IOStatus PositionedAppend(const Slice& data, uint64_t offset,
+  IOStatus PositionedAppend(size_t prefix, const Slice& data, uint64_t offset,
                             const IOOptions& options,
                             const DataVerificationInfo& /*verification_info*/,
                             IODebugContext* dbg) override {
-    return PositionedAppend(data, offset, options, dbg);
+    return PositionedAppend(prefix, data, offset, options, dbg);
   }
 
   IOStatus Truncate(uint64_t size, const IOOptions& options,

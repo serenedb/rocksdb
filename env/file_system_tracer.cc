@@ -402,11 +402,11 @@ IOStatus FSWritableFileTracingWrapper::Append(const Slice& data,
 }
 
 IOStatus FSWritableFileTracingWrapper::PositionedAppend(
-    const Slice& data, uint64_t offset, const IOOptions& options,
+    size_t prefix, const Slice& data, uint64_t offset, const IOOptions& options,
     IODebugContext* dbg) {
   StopWatchNano timer(clock_);
   timer.Start();
-  IOStatus s = target()->PositionedAppend(data, offset, options, dbg);
+  IOStatus s = target()->PositionedAppend(prefix, data, offset, options, dbg);
   uint64_t elapsed = timer.ElapsedNanos();
   uint64_t io_op_data = 0;
   io_op_data |= (1 << IOTraceOp::kIOLen);
