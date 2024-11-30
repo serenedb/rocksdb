@@ -93,19 +93,21 @@ class CountedWritableFile : public FSWritableFileOwnerWrapper {
     return rv;
   }
 
-  IOStatus PositionedAppend(const Slice& data, uint64_t offset,
+  IOStatus PositionedAppend(size_t prefix, const Slice& data, uint64_t offset,
                             const IOOptions& options,
                             IODebugContext* dbg) override {
-    IOStatus rv = target()->PositionedAppend(data, offset, options, dbg);
+    IOStatus rv =
+        target()->PositionedAppend(prefix, data, offset, options, dbg);
     fs_->counters()->writes.RecordOp(rv, data.size());
     return rv;
   }
 
-  IOStatus PositionedAppend(const Slice& data, uint64_t offset,
+  IOStatus PositionedAppend(size_t prefix, const Slice& data, uint64_t offset,
                             const IOOptions& options,
                             const DataVerificationInfo& info,
                             IODebugContext* dbg) override {
-    IOStatus rv = target()->PositionedAppend(data, offset, options, info, dbg);
+    IOStatus rv =
+        target()->PositionedAppend(prefix, data, offset, options, info, dbg);
     fs_->counters()->writes.RecordOp(rv, data.size());
     return rv;
   }

@@ -79,10 +79,10 @@ class TestFSWritableFile : public FSWritableFile {
   IOStatus RangeSync(uint64_t /*offset*/, uint64_t /*nbytes*/,
                      const IOOptions& options, IODebugContext* dbg) override;
   bool IsSyncThreadSafe() const override { return true; }
-  IOStatus PositionedAppend(const Slice& data, uint64_t offset,
+  IOStatus PositionedAppend(size_t prefix, const Slice& data, uint64_t offset,
                             const IOOptions& options,
                             IODebugContext* dbg) override;
-  IOStatus PositionedAppend(const Slice& data, uint64_t offset,
+  IOStatus PositionedAppend(size_t prefix, const Slice& data, uint64_t offset,
                             const IOOptions& options,
                             const DataVerificationInfo& verification_info,
                             IODebugContext* dbg) override;

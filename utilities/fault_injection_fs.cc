@@ -257,7 +257,7 @@ IOStatus TestFSWritableFile::Truncate(uint64_t size, const IOOptions& options,
   return s;
 }
 
-IOStatus TestFSWritableFile::PositionedAppend(const Slice& data,
+IOStatus TestFSWritableFile::PositionedAppend(size_t prefix, const Slice& data,
                                               uint64_t offset,
                                               const IOOptions& options,
                                               IODebugContext* dbg) {
@@ -277,7 +277,7 @@ IOStatus TestFSWritableFile::PositionedAppend(const Slice& data,
 
   // TODO(hx235): buffer data for direct IO write to simulate data loss like
   // non-direct IO write
-  s = target_->PositionedAppend(data, offset, options, dbg);
+  s = target_->PositionedAppend(prefix, data, offset, options, dbg);
   if (s.ok()) {
     state_.pos_at_last_append_ = offset + data.size();
     fs_->WritableFileAppended(state_);
@@ -286,7 +286,7 @@ IOStatus TestFSWritableFile::PositionedAppend(const Slice& data,
 }
 
 IOStatus TestFSWritableFile::PositionedAppend(
-    const Slice& data, uint64_t offset, const IOOptions& options,
+    size_t prefix, const Slice& data, uint64_t offset, const IOOptions& options,
     const DataVerificationInfo& verification_info, IODebugContext* dbg) {
   MutexLock l(&mutex_);
   if (!fs_->IsFilesystemActive()) {
@@ -316,7 +316,7 @@ IOStatus TestFSWritableFile::PositionedAppend(
   }
   // TODO(hx235): buffer data for direct IO write to simulate data loss like
   // non-direct IO write
-  s = target_->PositionedAppend(data, offset, options, dbg);
+  s = target_->PositionedAppend(prefix, data, offset, options, dbg);
   if (s.ok()) {
     state_.pos_at_last_append_ = offset + data.size();
     fs_->WritableFileAppended(state_);

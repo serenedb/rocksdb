@@ -1141,7 +1141,8 @@ class FSWritableFile {
   //
   // PositionedAppend() requires aligned buffer to be passed in. The alignment
   // required is queried via GetRequiredBufferAlignment()
-  virtual IOStatus PositionedAppend(const Slice& /* data */,
+  virtual IOStatus PositionedAppend(size_t /* prefix */,
+                                    const Slice& /* data */,
                                     uint64_t /* offset */,
                                     const IOOptions& /*options*/,
                                     IODebugContext* /*dbg*/) {
@@ -1157,7 +1158,7 @@ class FSWritableFile {
   // FSWritableFile, the information in DataVerificationInfo can be ignored
   // (i.e. does not perform checksum verification).
   virtual IOStatus PositionedAppend(
-      const Slice& /* data */, uint64_t /* offset */,
+      size_t /* prefix */, const Slice& /* data */, uint64_t /* offset */,
       const IOOptions& /*options*/,
       const DataVerificationInfo& /* verification_info */,
       IODebugContext* /*dbg*/) {
@@ -1827,17 +1828,17 @@ class FSWritableFileWrapper : public FSWritableFile {
                   IODebugContext* dbg) override {
     return target_->Append(data, options, verification_info, dbg);
   }
-  IOStatus PositionedAppend(const Slice& data, uint64_t offset,
+  IOStatus PositionedAppend(size_t prefix, const Slice& data, uint64_t offset,
                             const IOOptions& options,
                             IODebugContext* dbg) override {
-    return target_->PositionedAppend(data, offset, options, dbg);
+    return target_->PositionedAppend(prefix, data, offset, options, dbg);
   }
-  IOStatus PositionedAppend(const Slice& data, uint64_t offset,
+  IOStatus PositionedAppend(size_t prefix, const Slice& data, uint64_t offset,
                             const IOOptions& options,
                             const DataVerificationInfo& verification_info,
                             IODebugContext* dbg) override {
-    return target_->PositionedAppend(data, offset, options, verification_info,
-                                     dbg);
+    return target_->PositionedAppend(prefix, data, offset, options,
+                                     verification_info, dbg);
   }
   IOStatus Truncate(uint64_t size, const IOOptions& options,
                     IODebugContext* dbg) override {

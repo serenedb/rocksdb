@@ -802,6 +802,7 @@ IOStatus WritableFileWriter::WriteDirect(const IOOptions& opts) {
   // will write it again in the future either on Close() OR when the current
   // whole page fills out.
   const size_t leftover_tail = buf_.CurrentSize() - file_advance;
+  size_t real_left = buf_.CurrentSize();
 
   // Round up and pad
   buf_.PadToAlignmentWith(0);
@@ -834,12 +835,15 @@ IOStatus WritableFileWriter::WriteDirect(const IOOptions& opts) {
       if (perform_data_verification_) {
         Crc32cHandoffChecksumCalculation(src, size, checksum_buf);
         v_info.checksum = Slice(checksum_buf, sizeof(uint32_t));
-        s = writable_file_->PositionedAppend(Slice(src, size), write_offset,
+        s = writable_file_->PositionedAppend(std::min(size, real_left),
+                                             Slice(src, size), write_offset,
                                              opts, v_info, nullptr);
       } else {
-        s = writable_file_->PositionedAppend(Slice(src, size), write_offset,
+        s = writable_file_->PositionedAppend(std::min(size, real_left),
+                                             Slice(src, size), write_offset,
                                              opts, nullptr);
       }
+      real_left -= size;
 
       if (ShouldNotifyListeners()) {
         auto finish_ts = std::chrono::steady_clock::now();
@@ -902,7 +906,7 @@ IOStatus WritableFileWriter::WriteDirectWithChecksum(const IOOptions& opts) {
   const size_t leftover_tail = buf_.CurrentSize() - file_advance;
 
   // Round up, pad, and combine the checksum.
-  size_t last_cur_size = buf_.CurrentSize();
+  const size_t last_cur_size = buf_.CurrentSize();
   buf_.PadToAlignmentWith(0);
   size_t padded_size = buf_.CurrentSize() - last_cur_size;
   const char* padded_start = buf_.BufferStart() + last_cur_size;
@@ -912,7 +916,7 @@ IOStatus WritableFileWriter::WriteDirectWithChecksum(const IOOptions& opts) {
 
   const char* src = buf_.BufferStart();
   uint64_t write_offset = next_write_offset_;
-  size_t left = buf_.CurrentSize();
+  const size_t left = buf_.CurrentSize();
   DataVerificationInfo v_info;
   char checksum_buf[sizeof(uint32_t)];
 
@@ -942,8 +946,8 @@ IOStatus WritableFileWriter::WriteDirectWithChecksum(const IOOptions& opts) {
     // direct writes must be positional
     EncodeFixed32(checksum_buf, buffered_data_crc32c_checksum_);
     v_info.checksum = Slice(checksum_buf, sizeof(uint32_t));
-    s = writable_file_->PositionedAppend(Slice(src, left), write_offset, opts,
-                                         v_info, nullptr);
+    s = writable_file_->PositionedAppend(last_cur_size, Slice(src, left),
+                                         write_offset, opts, v_info, nullptr);
 
     if (ShouldNotifyListeners()) {
       auto finish_ts = std::chrono::steady_clock::now();

@@ -1569,7 +1569,8 @@ IOStatus PosixWritableFile::Append(const Slice& data, const IOOptions& /*opts*/,
   return IOStatus::OK();
 }
 
-IOStatus PosixWritableFile::PositionedAppend(const Slice& data, uint64_t offset,
+IOStatus PosixWritableFile::PositionedAppend(size_t /*prefix*/,
+                                             const Slice& data, uint64_t offset,
                                              const IOOptions& /*opts*/,
                                              IODebugContext* /*dbg*/) {
   if (use_direct_io()) {
