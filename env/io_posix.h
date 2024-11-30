@@ -393,14 +393,14 @@ class PosixWritableFile : public FSWritableFile {
                   IODebugContext* dbg) override {
     return Append(data, opts, dbg);
   }
-  IOStatus PositionedAppend(const Slice& data, uint64_t offset,
+  IOStatus PositionedAppend(size_t prefix, const Slice& data, uint64_t offset,
                             const IOOptions& opts,
                             IODebugContext* dbg) override;
-  IOStatus PositionedAppend(const Slice& data, uint64_t offset,
+  IOStatus PositionedAppend(size_t prefix, const Slice& data, uint64_t offset,
                             const IOOptions& opts,
                             const DataVerificationInfo& /* verification_info */,
                             IODebugContext* dbg) override {
-    return PositionedAppend(data, offset, opts, dbg);
+    return PositionedAppend(prefix, data, offset, opts, dbg);
   }
   IOStatus Flush(const IOOptions& opts, IODebugContext* dbg) override;
   IOStatus Sync(const IOOptions& opts, IODebugContext* dbg) override;

@@ -123,16 +123,17 @@ class WritableFileMirror : public WritableFile {
                 const DataVerificationInfo& /* verification_info */) override {
     return Append(data);
   }
-  Status PositionedAppend(const Slice& data, uint64_t offset) override {
-    Status as = a_->PositionedAppend(data, offset);
-    Status bs = b_->PositionedAppend(data, offset);
+  Status PositionedAppend(size_t prefix, const Slice& data,
+                          uint64_t offset) override {
+    Status as = a_->PositionedAppend(prefix, data, offset);
+    Status bs = b_->PositionedAppend(prefix, data, offset);
     assert(as == bs);
     return as;
   }
   Status PositionedAppend(
-      const Slice& data, uint64_t offset,
+      size_t prefix, const Slice& data, uint64_t offset,
       const DataVerificationInfo& /* verification_info */) override {
-    return PositionedAppend(data, offset);
+    return PositionedAppend(prefix, data, offset);
   }
   Status Truncate(uint64_t size) override {
     Status as = a_->Truncate(size);
