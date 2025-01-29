@@ -992,7 +992,7 @@ static const std::unordered_map<std::string, OptionTypeInfo>
 
 void CTRCipherStream::AllocateScratch(std::string& scratch) {
   auto blockSize = cipher_->BlockSize();
-  scratch.reserve(blockSize);
+  scratch.__resize_default_init(blockSize);
 }
 
 Status CTRCipherStream::EncryptBlock(uint64_t blockIndex, char* data,
