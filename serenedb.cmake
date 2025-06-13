@@ -17,7 +17,7 @@ if (IPO_ENABLED)
 endif()
 
 # jemalloc settings
-if (USE_JEMALLOC)
+if ("${SDB_ALLOC}" MATCHES "JE")
   if (WIN32)
     set(USE_JEMALLOC_DEFAULT 1                                  CACHE BOOL "enable jemalloc")
     set(JEMALLOC_INCLUDE     ${JEMALLOC_HOME}/include           CACHE PATH "include path")
