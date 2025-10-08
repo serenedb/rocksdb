@@ -7,10 +7,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-suggest-override")
 endif()
 
-# we want the following definitions to be in effect for both rocksdb and serenedb
-add_definitions("-DNROCKSDB_THREAD_STATUS")
-add_definitions("-DROCKSDB_SUPPORT_THREAD_LOCAL")
-
 # IPO_ENABLED is set by the top-level CMakeLists.txt file
 if (IPO_ENABLED)
   set(CMAKE_INTERPROCEDURAL_OPTIMIZATION True)
