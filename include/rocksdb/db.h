@@ -1905,6 +1905,8 @@ class DB {
       const TransactionLogIterator::ReadOptions& read_options =
           TransactionLogIterator::ReadOptions()) = 0;
 
+  virtual Status DeleteFile(const std::string& name) = 0;
+
   // Obtains a list of all live table (SST) files and how they fit into the
   // LSM-trees, such as column family, level, key range, etc.
   // This builds a de-normalized form of GetAllColumnFamilyMetaData().
