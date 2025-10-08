@@ -284,7 +284,7 @@ struct LockMapStripe {
 
   void ReleaseLastLockHolder(
       LockInfo& lock_info,
-      UnorderedMap<std::string, LockInfo>::iterator stripe_iter,
+      absl::node_hash_map<std::string, LockInfo>::iterator stripe_iter,
       LockMap* lock_map, TransactionID txn_id, const std::string& key,
       const int64_t max_num_locks, autovector<TransactionID>& txns,
       autovector<TransactionID>::iterator& txn_it);
@@ -297,7 +297,8 @@ struct LockMapStripe {
 
   // Locked keys mapped to the info about the transactions that locked them.
   // TODO(agiardullo): Explore performance of other data structures.
-  UnorderedMap<std::string, LockInfo> keys;
+  // TODO(mbkkt) UnorderedMap?
+  absl::node_hash_map<std::string, LockInfo> keys;
 
  private:
   std::shared_ptr<TransactionDBMutexFactory> mutex_factory_;
@@ -370,7 +371,7 @@ inline void RemoveTransaction(autovector<TransactionID>& txns,
 
 void LockMapStripe::ReleaseLastLockHolder(
     LockInfo& lock_info,
-    UnorderedMap<std::string, LockInfo>::iterator stripe_iter,
+    absl::node_hash_map<std::string, LockInfo>::iterator stripe_iter,
     LockMap* lock_map, TransactionID txn_id, const std::string& key,
     const int64_t max_num_locks, autovector<TransactionID>& txns,
     autovector<TransactionID>::iterator& txn_it) {
@@ -793,6 +794,12 @@ void PointLockManager::UnLockKey(PessimisticTransaction* txn,
     if (txn_it != txns.end()) {
       if (txns.size() == 1) {
         stripe->keys.erase(stripe_iter);
+        if (stripe->keys.empty() && stripe->keys.capacity() >= 16'384) {
+          // If the stripe is empty after the deletion, we take the
+          // time to do a rehash of the stripe map. This reclaims the
+          // underlying container's memory.
+          stripe->keys.rehash(0);
+        }
       } else {
         auto last_it = txns.end() - 1;
         if (txn_it != last_it) {
