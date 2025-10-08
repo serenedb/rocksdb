@@ -7,6 +7,8 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-suggest-override")
 endif()
 
+add_definitions("-DNROCKSDB_THREAD_STATUS")
+
 # IPO_ENABLED is set by the top-level CMakeLists.txt file
 if (IPO_ENABLED)
   set(CMAKE_INTERPROCEDURAL_OPTIMIZATION True)
