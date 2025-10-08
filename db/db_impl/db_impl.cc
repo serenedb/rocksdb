@@ -4956,6 +4956,22 @@ Status DBImpl::GetUpdatesSince(
   return wal_manager_.GetUpdatesSince(seq, iter, read_options, versions_.get());
 }
 
+Status DBImpl::DeleteFile(const std::string& name) {
+  uint64_t number;
+  FileType type;
+  WalFileType log_type;
+  if (!ParseFileName(name, &number, &type, &log_type)) {
+    return Status::InvalidArgument("Invalid file name");
+  }
+  if (type != kWalFile) {
+    return Status::NotSupported("Delete only supported for WAL files");
+  }
+  if (log_type != kArchivedLogFile) {
+    return Status::NotSupported("Delete only supported for archived logs");
+  }
+  return wal_manager_.DeleteFile(name, number);
+}
+
 Status DBImpl::DeleteFilesInRanges(ColumnFamilyHandle* column_family,
                                    const RangeOpt* ranges, size_t n,
                                    bool include_end) {
