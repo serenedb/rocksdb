@@ -540,6 +540,10 @@ class StackableDB : public DB {
     return db_->GetCreationTimeOfOldestFile(creation_time);
   }
 
+  Status DeleteFile(const std::string& name) override {
+    return db_->DeleteFile(name);
+  }
+
   Status GetDbIdentity(std::string& identity) const override {
     return db_->GetDbIdentity(identity);
   }
