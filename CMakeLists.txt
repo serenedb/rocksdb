@@ -671,6 +671,7 @@ if(USE_FOLLY)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--copy-dt-needed-entries")
 endif()
 find_package(Threads REQUIRED)
+add_compile_definitions(ROCKSDB_USE_STD_SEMAPHORES)
 
 # Main library source code
 
