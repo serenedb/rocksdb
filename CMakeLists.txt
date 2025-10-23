@@ -612,7 +612,6 @@ if(USE_COROUTINES)
     message(FATAL_ERROR "Please specify exactly one of USE_COROUTINES,"
     " USE_FOLLY, and USE_FOLLY_LITE")
   endif()
-  set(CMAKE_CXX_STANDARD 20)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-redundant-move")
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
