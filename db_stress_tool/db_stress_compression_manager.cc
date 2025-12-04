@@ -11,8 +11,8 @@ void DbStressCustomCompressionManager::Register() {
   // We must register any compression managers with a custom
   // CompatibilityName() so that if it was used in a past invocation but not
   // the current invocation, we can still read the SST files requiring it.
-  static std::once_flag loaded;
-  std::call_once(loaded, [&]() {
+  static absl::once_flag loaded;
+  absl::call_once(loaded, [&]() {
     TEST_AllowUnsupportedFormatVersion() = true;
     auto& library = *ObjectLibrary::Default();
     library.AddFactory<CompressionManager>(

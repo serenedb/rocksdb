@@ -74,8 +74,8 @@ static int RegisterSstPartitionerFactories(ObjectLibrary& library,
 Status SstPartitionerFactory::CreateFromString(
     const ConfigOptions& options, const std::string& value,
     std::shared_ptr<SstPartitionerFactory>* result) {
-  static std::once_flag once;
-  std::call_once(once, [&]() {
+  static absl::once_flag once;
+  absl::call_once(once, [&]() {
     RegisterSstPartitionerFactories(*(ObjectLibrary::Default().get()), "");
   });
   return LoadSharedObject<SstPartitionerFactory>(options, value, result);

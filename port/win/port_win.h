@@ -209,7 +209,7 @@ struct OnceType {
   OnceType(const OnceType&) = delete;
   OnceType& operator=(const OnceType&) = delete;
 
-  std::once_flag flag_;
+  absl::once_flag flag_;
 };
 
 #define LEVELDB_ONCE_INIT port::OnceType::Init()

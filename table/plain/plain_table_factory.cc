@@ -229,8 +229,8 @@ Status GetMemTableRepFactoryFromString(
 Status MemTableRepFactory::CreateFromString(
     const ConfigOptions& config_options, const std::string& value,
     std::unique_ptr<MemTableRepFactory>* result) {
-  static std::once_flag once;
-  std::call_once(once, [&]() {
+  static absl::once_flag once;
+  absl::call_once(once, [&]() {
     RegisterBuiltinMemTableRepFactory(*(ObjectLibrary::Default().get()), "");
   });
   std::string id;

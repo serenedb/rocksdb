@@ -389,8 +389,8 @@ static int RegisterBuiltinStatistics(ObjectLibrary& library,
 Status Statistics::CreateFromString(const ConfigOptions& config_options,
                                     const std::string& id,
                                     std::shared_ptr<Statistics>* result) {
-  static std::once_flag once;
-  std::call_once(once, [&]() {
+  static absl::once_flag once;
+  absl::call_once(once, [&]() {
     RegisterBuiltinStatistics(*(ObjectLibrary::Default().get()), "");
   });
   Status s;
