@@ -270,7 +270,7 @@ void FragmentedRangeTombstoneList::FragmentTombstones(
 
 bool FragmentedRangeTombstoneList::ContainsRange(SequenceNumber lower,
                                                  SequenceNumber upper) {
-  std::call_once(seq_set_init_once_flag_, [this]() {
+  absl::call_once(seq_set_init_once_flag_, [this]() {
     for (auto s : tombstone_seqs_) {
       seq_set_.insert(s);
     }

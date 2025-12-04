@@ -50,8 +50,8 @@ static int RegisterBuiltinEnvs(ObjectLibrary& library,
 }
 
 static void RegisterSystemEnvs() {
-  static std::once_flag loaded;
-  std::call_once(loaded, [&]() {
+  static absl::once_flag loaded;
+  absl::call_once(loaded, [&]() {
     RegisterBuiltinEnvs(*(ObjectLibrary::Default().get()), "");
   });
 }
@@ -1284,8 +1284,8 @@ Status SystemClock::CreateFromString(const ConfigOptions& config_options,
     *result = clock;
     return Status::OK();
   } else {
-    static std::once_flag once;
-    std::call_once(once, [&]() {
+    static absl::once_flag once;
+    absl::call_once(once, [&]() {
       RegisterBuiltinSystemClocks(*(ObjectLibrary::Default().get()), "");
     });
     return LoadSharedObject<SystemClock>(config_options, value, result);
