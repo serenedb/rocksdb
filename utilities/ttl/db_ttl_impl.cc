@@ -327,8 +327,8 @@ Status DBWithTTLImpl::Close() {
 }
 
 void DBWithTTLImpl::RegisterTtlClasses() {
-  static std::once_flag once;
-  std::call_once(once, [&]() {
+  static absl::once_flag once;
+  absl::call_once(once, [&]() {
     ObjectRegistry::Default()->AddLibrary("TTL", RegisterTtlObjects, "");
   });
 }

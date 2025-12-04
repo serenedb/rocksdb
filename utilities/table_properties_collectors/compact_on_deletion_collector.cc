@@ -257,8 +257,8 @@ static int RegisterTablePropertiesCollectorFactories(
 Status TablePropertiesCollectorFactory::CreateFromString(
     const ConfigOptions& options, const std::string& value,
     std::shared_ptr<TablePropertiesCollectorFactory>* result) {
-  static std::once_flag once;
-  std::call_once(once, [&]() {
+  static absl::once_flag once;
+  absl::call_once(once, [&]() {
     RegisterTablePropertiesCollectorFactories(*(ObjectLibrary::Default().get()),
                                               "");
   });

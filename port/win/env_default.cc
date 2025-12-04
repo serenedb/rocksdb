@@ -26,7 +26,7 @@ namespace port {
 //    dead-lock.
 //    in this manner any remaining threads are terminated OK.
 namespace {
-std::once_flag winenv_once_flag;
+absl::once_flag winenv_once_flag;
 Env* envptr;
 };  // namespace
 }  // namespace port
@@ -35,7 +35,7 @@ Env* Env::Default() {
   ThreadLocalPtr::InitSingletons();
   CompressionContextCache::InitSingleton();
   INIT_SYNC_POINT_SINGLETONS();
-  std::call_once(port::winenv_once_flag,
+  absl::call_once(port::winenv_once_flag,
                  []() { port::envptr = new port::WinEnv(); });
   return port::envptr;
 }

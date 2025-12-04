@@ -78,9 +78,9 @@ const SstQueryFilterConfigsManager::Data data = {
 }  // namespace
 
 SstQueryFilterConfigsManager& DbStressSqfcManager() {
-  std::once_flag flag;
+  absl::once_flag flag;
   static std::shared_ptr<SstQueryFilterConfigsManager> mgr;
-  std::call_once(flag, []() {
+  absl::call_once(flag, []() {
     Status s = SstQueryFilterConfigsManager::MakeShared(data, &mgr);
     assert(s.ok());
     assert(mgr);
