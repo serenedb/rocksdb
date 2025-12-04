@@ -27,8 +27,8 @@ static int RegisterBuiltinCompactionFilters(ObjectLibrary& library,
 Status CompactionFilter::CreateFromString(const ConfigOptions& config_options,
                                           const std::string& value,
                                           const CompactionFilter** result) {
-  static std::once_flag once;
-  std::call_once(once, [&]() {
+  static absl::once_flag once;
+  absl::call_once(once, [&]() {
     RegisterBuiltinCompactionFilters(*(ObjectLibrary::Default().get()), "");
   });
   CompactionFilter* filter = const_cast<CompactionFilter*>(*result);

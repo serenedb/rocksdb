@@ -103,8 +103,8 @@ static int RegisterFileChecksumGenFactories(ObjectLibrary& library,
 Status FileChecksumGenFactory::CreateFromString(
     const ConfigOptions& options, const std::string& value,
     std::shared_ptr<FileChecksumGenFactory>* result) {
-  static std::once_flag once;
-  std::call_once(once, [&]() {
+  static absl::once_flag once;
+  absl::call_once(once, [&]() {
     RegisterFileChecksumGenFactories(*(ObjectLibrary::Default().get()), "");
   });
   if (value == FileChecksumGenCrc32cFactory::kClassName()) {
