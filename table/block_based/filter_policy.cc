@@ -2051,8 +2051,8 @@ Status FilterPolicy::CreateFromString(
   } else if (id.empty()) {  // We have no Id but have options.  Not good
     return Status::NotSupported("Cannot reset object ", id);
   } else {
-    static std::once_flag loaded;
-    std::call_once(loaded, [&]() {
+    static absl::once_flag loaded;
+    absl::call_once(loaded, [&]() {
       RegisterBuiltinFilterPolicies(*(ObjectLibrary::Default().get()), "");
     });
     status = options.registry->NewSharedObject(id, policy);

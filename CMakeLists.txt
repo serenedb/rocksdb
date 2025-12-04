@@ -1192,8 +1192,12 @@ target_include_directories(${ROCKSDB_STATIC_LIB} PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 target_link_libraries(${ROCKSDB_STATIC_LIB} PRIVATE
   ${THIRDPARTY_LIBS} ${SYSTEM_LIBS})
-target_link_libraries(${ROCKSDB_STATIC_LIB} PRIVATE
-  absl::flat_hash_set absl::flat_hash_map absl::node_hash_map)
+target_link_libraries(${ROCKSDB_STATIC_LIB} 
+  PUBLIC absl::base
+  PRIVATE absl::flat_hash_set 
+  PRIVATE absl::flat_hash_map 
+  PRIVATE absl::node_hash_map
+)
 
 if(ROCKSDB_BUILD_SHARED)
   add_library(${ROCKSDB_SHARED_LIB} SHARED ${SOURCES} ${BUILD_VERSION_CC})

@@ -69,8 +69,8 @@ MemoryAllocatorWrapper::MemoryAllocatorWrapper(
 Status MemoryAllocator::CreateFromString(
     const ConfigOptions& options, const std::string& value,
     std::shared_ptr<MemoryAllocator>* result) {
-  static std::once_flag once;
-  std::call_once(once, [&]() {
+  static absl::once_flag once;
+  absl::call_once(once, [&]() {
     RegisterBuiltinAllocators(*(ObjectLibrary::Default().get()), "");
   });
   ConfigOptions copy = options;

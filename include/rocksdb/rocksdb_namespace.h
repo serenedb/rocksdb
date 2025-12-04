@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <absl/base/call_once.h>
+
 // For testing purposes
 #if ROCKSDB_NAMESPACE == 42
 #undef ROCKSDB_NAMESPACE

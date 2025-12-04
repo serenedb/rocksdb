@@ -1160,8 +1160,8 @@ Status CTREncryptionProvider::CreateCipherStreamFromPrefix(
 
 namespace {
 static void RegisterEncryptionBuiltins() {
-  static std::once_flag once;
-  std::call_once(once, [&]() {
+  static absl::once_flag once;
+  absl::call_once(once, [&]() {
     auto lib = ObjectRegistry::Default()->AddLibrary("encryption");
     // Match "CTR" or "CTR://test"
     lib->AddFactory<EncryptionProvider>(
