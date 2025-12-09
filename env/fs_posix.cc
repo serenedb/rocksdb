@@ -1097,9 +1097,14 @@ class PosixFileSystem : public FileSystem {
     }
 
     for (size_t i = 0; i < io_handles.size(); i++) {
+      const auto* wait_handle = static_cast<Posix_IOHandle*>(io_handles[i]);
       // The request has been completed in earlier runs.
-      if ((static_cast<Posix_IOHandle*>(io_handles[i]))->is_finished) {
+      if (wait_handle->is_finished) {
         continue;
+      }
+      assert(wait_handle->iu == iu);
+      if (wait_handle->iu != iu) {
+        return IOStatus::IOError("");
       }
       // Loop until IO for io_handles[i] is completed.
       while (true) {
@@ -1145,7 +1150,7 @@ class PosixFileSystem : public FileSystem {
         (void)bytes_read;
         (void)read_again;
 
-        if (static_cast<Posix_IOHandle*>(io_handles[i]) == posix_handle) {
+        if (wait_handle == posix_handle) {
           break;
         }
       }

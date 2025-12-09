@@ -1139,11 +1139,19 @@ Status PessimisticTransaction::TryLock(ColumnFamilyHandle* column_family,
                                        const Slice& key, bool read_only,
                                        bool exclusive, const bool do_validate,
                                        const bool assume_tracked) {
+  if (UNLIKELY(skip_concurrency_control_)) {
+    return {};
+  }
+  return TryLockImpl(column_family, key, read_only, exclusive, do_validate,
+                          assume_tracked);
+}
+
+Status PessimisticTransaction::TryLockImpl(ColumnFamilyHandle* column_family,
+                                       const Slice& key, bool read_only,
+                                       bool exclusive, const bool do_validate,
+                                       const bool assume_tracked) {
   assert(!assume_tracked || !do_validate);
   Status s;
-  if (UNLIKELY(skip_concurrency_control_)) {
-    return s;
-  }
   uint32_t cfh_id = GetColumnFamilyID(column_family);
   std::string key_str = key.ToString();
 
@@ -1268,6 +1276,15 @@ Status PessimisticTransaction::GetRangeLock(ColumnFamilyHandle* column_family,
     tracked_locks_->Track(req);
   }
   return s;
+}
+
+Status PessimisticTransaction::GetKeyLock(ColumnFamilyHandle* column_family,
+                                          const Slice& key, bool read_only,
+                                          bool exclusive,
+                                          const bool do_validate,
+                                          const bool assume_tracked) {
+  return TryLockImpl(column_family, key, read_only, exclusive, do_validate,
+                     assume_tracked);
 }
 
 // Return OK() if this key has not been modified more recently than the
