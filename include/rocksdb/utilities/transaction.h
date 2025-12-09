@@ -422,6 +422,13 @@ class Transaction {
     return Status::NotSupported();
   }
 
+  virtual Status GetKeyLock(ColumnFamilyHandle*, const Slice&,
+                         bool read_only, bool exclusive,
+                         const bool do_validate = true,
+                         const bool assume_tracked = false) {
+    return Status::NotSupported();
+  }
+
   virtual Status GetForUpdate(const ReadOptions& options, const Slice& key,
                               std::string* value, bool exclusive = true,
                               const bool do_validate = true) = 0;
