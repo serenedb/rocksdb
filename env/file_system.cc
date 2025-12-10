@@ -87,8 +87,8 @@ Status FileSystem::CreateFromString(const ConfigOptions& config_options,
     *result = default_fs;
     return Status::OK();
   } else {
-    static std::once_flag once;
-    std::call_once(once, [&]() {
+    static absl::once_flag once;
+    absl::call_once(once, [&]() {
       RegisterBuiltinFileSystems(*(ObjectLibrary::Default().get()), "");
     });
     return LoadSharedObject<FileSystem>(config_options, value, result);

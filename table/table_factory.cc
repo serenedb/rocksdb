@@ -16,8 +16,8 @@
 namespace ROCKSDB_NAMESPACE {
 
 static void RegisterTableFactories(const std::string& /*arg*/) {
-  static std::once_flag loaded;
-  std::call_once(loaded, []() {
+  static absl::once_flag loaded;
+  absl::call_once(loaded, []() {
     auto library = ObjectLibrary::Default();
     library->AddFactory<TableFactory>(
         TableFactory::kBlockBasedTableName(),
