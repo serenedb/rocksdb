@@ -423,9 +423,9 @@ class Transaction {
   }
 
   virtual Status GetKeyLock(ColumnFamilyHandle*, const Slice&, bool read_only,
-                            bool exclusive, const bool do_validate = true,
-                            const bool assume_tracked = false,
-                            const bool reentrant = true) {
+                            bool exclusive, const bool reentrant = true,
+                            const bool do_validate = true,
+                            const bool assume_tracked = false) {
     return Status::NotSupported();
   }
 

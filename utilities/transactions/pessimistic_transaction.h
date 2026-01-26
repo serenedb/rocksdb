@@ -131,10 +131,9 @@ class PessimisticTransaction : public TransactionBaseImpl {
                       const Endpoint& end_key) override;
 
   Status GetKeyLock(ColumnFamilyHandle* column_family, const Slice& key,
-                    bool read_only, bool exclusive,
+                    bool read_only, bool exclusive, const bool reentrant = true,
                     const bool do_validate = true,
-                    const bool assume_tracked = false,
-                    const bool reentrant = false) final;
+                    const bool assume_tracked = false) final;
 
   Status CollapseKey(const ReadOptions& options, const Slice& key,
                      ColumnFamilyHandle* column_family = nullptr) override;

@@ -1280,12 +1280,11 @@ Status PessimisticTransaction::GetRangeLock(ColumnFamilyHandle* column_family,
 
 Status PessimisticTransaction::GetKeyLock(ColumnFamilyHandle* column_family,
                                           const Slice& key, bool read_only,
-                                          bool exclusive,
+                                          bool exclusive, const bool reentrant,
                                           const bool do_validate,
-                                          const bool assume_tracked,
-                                          const bool reentrant) {
-  auto [status, was_locked] = TryLockImpl(column_family, key, read_only, exclusive,
-                                       do_validate, assume_tracked);
+                                          const bool assume_tracked) {
+  auto [status, was_locked] = TryLockImpl(
+      column_family, key, read_only, exclusive, do_validate, assume_tracked);
 
   if (!reentrant && was_locked) {
     status = Status::Busy(Status::SubCode::kReentrantLockAttempt);
