@@ -117,6 +117,7 @@ class Status {
     kMergeOperandThresholdExceeded = 16,
     kPrefetchLimitReached = 17,
     kNotExpectedCodePath = 18,
+    kReentrantLockAttempt = 19,
     kMaxSubCode
   };
 

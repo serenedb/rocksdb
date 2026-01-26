@@ -422,17 +422,10 @@ class Transaction {
     return Status::NotSupported();
   }
 
-  virtual Status GetKeyLock(ColumnFamilyHandle*, const Slice&,
-                         bool read_only, bool exclusive,
-                         const bool do_validate = true,
-                         const bool assume_tracked = false) {
-    return Status::NotSupported();
-  }
-
-  virtual Status GetKeyLockOnce(ColumnFamilyHandle*, const Slice&,
-                         bool read_only, bool exclusive,
-                         const bool do_validate = true,
-                         const bool assume_tracked = false) {
+  virtual Status GetKeyLock(ColumnFamilyHandle*, const Slice&, bool read_only,
+                            bool exclusive, const bool do_validate = true,
+                            const bool assume_tracked = false,
+                            const bool reentrant = true) {
     return Status::NotSupported();
   }
 
