@@ -1143,13 +1143,13 @@ Status PessimisticTransaction::TryLock(ColumnFamilyHandle* column_family,
     return {};
   }
   return TryLockImpl(column_family, key, read_only, exclusive, do_validate,
-                          assume_tracked);
+                     assume_tracked)
+      .first;
 }
 
-Status PessimisticTransaction::TryLockImpl(ColumnFamilyHandle* column_family,
-                                       const Slice& key, bool read_only,
-                                       bool exclusive, const bool do_validate,
-                                       const bool assume_tracked) {
+std::pair<Status, bool> PessimisticTransaction::TryLockImpl(
+    ColumnFamilyHandle* column_family, const Slice& key, bool read_only,
+    bool exclusive, const bool do_validate, const bool assume_tracked) {
   assert(!assume_tracked || !do_validate);
   Status s;
   uint32_t cfh_id = GetColumnFamilyID(column_family);
@@ -1259,7 +1259,7 @@ Status PessimisticTransaction::TryLockImpl(ColumnFamilyHandle* column_family,
     }
   }
 
-  return s;
+  return {s, previously_locked};
 }
 
 Status PessimisticTransaction::GetRangeLock(ColumnFamilyHandle* column_family,
@@ -1284,7 +1284,22 @@ Status PessimisticTransaction::GetKeyLock(ColumnFamilyHandle* column_family,
                                           const bool do_validate,
                                           const bool assume_tracked) {
   return TryLockImpl(column_family, key, read_only, exclusive, do_validate,
-                     assume_tracked);
+                     assume_tracked)
+      .first;
+}
+
+Status PessimisticTransaction::GetKeyLockOnce(ColumnFamilyHandle* column_family,
+                                              const Slice& key, bool read_only,
+                                              bool exclusive,
+                                              const bool do_validate,
+                                              const bool assume_tracked) {
+  auto [status, present] = TryLockImpl(column_family, key, read_only, exclusive,
+                                       do_validate, assume_tracked);
+
+  if (present) {
+    status = Status::Busy(Status::SubCode::kLockLimit);
+  }
+  return status;
 }
 
 // Return OK() if this key has not been modified more recently than the
