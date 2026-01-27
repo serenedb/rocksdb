@@ -1284,6 +1284,14 @@ Status PessimisticTransaction::GetKeyLock(ColumnFamilyHandle* column_family,
                                           const bool do_validate,
                                           const bool assume_tracked,
                                           const bool reentrant) {
+  // The following scenario is possible:
+  // - call with key="foo", exclusive=false, reentrant=false
+  // - call with key="foo", exclusive=true, reentrant=false
+  // In such a case the second call will upgrade the lock, but return
+  // non-OK status. To avoid such a problem, we prohibit the ability
+  // to upgrade the lock when reentrant=false, so the assert below
+  // will be failed on the first call.
+  assert(exclusive || reentrant);
   auto [status, was_locked] = TryLockImpl(
       column_family, key, read_only, exclusive, do_validate, assume_tracked);
 

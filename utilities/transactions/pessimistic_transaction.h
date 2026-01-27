@@ -164,8 +164,7 @@ class PessimisticTransaction : public TransactionBaseImpl {
   // Status and was previously locked or not
   std::pair<Status, bool> TryLockImpl(ColumnFamilyHandle* column_family,
                                       const Slice& key, bool read_only,
-                                      bool exclusive,
-                                      const bool do_validate,
+                                      bool exclusive, const bool do_validate,
                                       const bool assume_tracked);
 
   void Clear() override;
