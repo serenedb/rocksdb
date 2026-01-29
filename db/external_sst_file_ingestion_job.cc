@@ -718,19 +718,17 @@ void ExternalSstFileIngestionJob::CreateEquivalentFileIngestingCompactions() {
   // instead of per output level, once we figure out how to treat ingested files
   // with adjacent range deletion tombstones to same output level in the same
   // job as non-overlapping compactions.
-  std::map<int, CompactionInputFiles>
+  std::vector<std::pair<int, CompactionInputFiles>>
       output_level_to_file_ingesting_compaction_input;
 
-  for (const auto& pair : edit_.GetNewFiles()) {
-    int output_level = pair.first;
+  for (const auto& pair : edit_.GetNewFiles()) { 
     const FileMetaData& f_metadata = pair.second;
 
-    CompactionInputFiles& input =
-        output_level_to_file_ingesting_compaction_input[output_level];
-    if (input.files.empty()) {
-      // Treat the source level of ingested files to be level 0
-      input.level = 0;
-    }
+    auto& [output_level, input] =
+        output_level_to_file_ingesting_compaction_input.emplace_back();
+    // Treat the source level of ingested files to be level 0
+    input.level = 0;
+    output_level = pair.first;
 
     compaction_input_metdatas_.push_back(new FileMetaData(f_metadata));
     input.files.push_back(compaction_input_metdatas_.back());
