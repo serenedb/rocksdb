@@ -503,6 +503,12 @@ class Status {
     return (code() == kIncomplete) && (subcode() == kPrefetchLimitReached);
   }
 
+  // Returns true iff the status indicates a NotFound error.
+  bool IsReentrantLockAttempt() const {
+    MarkChecked();
+    return (code() == kBusy) && (subcode() == kReentrantLockAttempt);
+  }
+
   // Return a string representation of this status suitable for printing.
   // Returns the string "OK" for success.
   std::string ToString() const;

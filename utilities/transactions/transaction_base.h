@@ -257,6 +257,8 @@ class TransactionBaseImpl : public Transaction {
     return snapshot_.get();
   }
 
+  DB* GetDB() override { return db_; }
+
   std::shared_ptr<const Snapshot> GetTimestampedSnapshot() const override {
     return snapshot_;
   }

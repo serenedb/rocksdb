@@ -196,6 +196,7 @@ class Transaction {
   // SetSnapshot()/SetSnapshotOnNextSavePoint() is called, ClearSnapshot()
   // is called, or the Transaction is deleted.
   virtual const Snapshot* GetSnapshot() const = 0;
+  virtual DB* GetDB() = 0;
 
   // Returns the Snapshot created by the last call to SetSnapshot().
   // The returned snapshot can outlive the transaction.
