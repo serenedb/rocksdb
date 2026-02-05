@@ -85,6 +85,7 @@ struct SstFileWriter::Rep {
 #ifndef NDEBUG
     uint64_t footer = DecodeFixed64(internal_key.data() + internal_key.size() -
                                     kNumInternalBytes);
+    // same is appended in AddImpl via ikey.Set(*,sequence_number, value_type);
     assert(footer == SstFileWriter::kInternalKeyFooter);
 
     Slice user_key{internal_key.data(),
