@@ -441,7 +441,6 @@ Status SstFileWriter::Open(const std::string& file_path, Temperature temp) {
 
   // TODO(tec) : If table_factory is using compressed block cache, we will
   // be adding the external sst file blocks into it, which is wasteful.
-  // Direct instantiation for BlockBasedTableBuilder to avoid virtual calls
   const auto* block_based_options =
       r->mutable_cf_options.table_factory->GetOptions<BlockBasedTableOptions>();
   r->builder.reset(new BlockBasedTableBuilder(
