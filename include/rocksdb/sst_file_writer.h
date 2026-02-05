@@ -77,7 +77,6 @@ class SstFileWriter {
  public:
   // Internal key footer for SST files: PackSequenceAndType(0, kTypeValue)
   // The footer is 8 bytes encoding (sequence_number << 8) | value_type
-  // kTypeValue = 0x1, verified by static_assert in sst_file_writer.cc
   static constexpr uint64_t kInternalKeyFooter = (uint64_t{0} << 8) | 0x1;
 
   // User can pass `column_family` to specify that the generated file will
