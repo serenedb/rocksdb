@@ -27,8 +27,9 @@ const std::string ExternalSstFilePropertyNames::kGlobalSeqno =
 
 const size_t kFadviseTrigger = 1024 * 1024;  // 1MB
 
-const uint64_t SstFileWriter::kInternalKeyFooter =
-    (uint64_t{0} << 8) | kTypeValue;
+static_assert(
+    SstFileWriter::kInternalKeyFooter == ((uint64_t{0} << 8) | kTypeValue),
+    "kInternalKeyFooter must match PackSequenceAndType(0, kTypeValue)");
 
 struct SstFileWriter::Rep {
   Rep(const EnvOptions& _env_options, const Options& options,
