@@ -58,65 +58,65 @@ class BlockBasedTableBuilder : public TableBuilder {
   //           previously added non-kTypeRangeDeletion key according to
   //           comparator.
   // REQUIRES: Finish(), Abandon() have not been called
-  void Add(const Slice& key, const Slice& value) override;
+  void Add(const Slice& key, const Slice& value) final;
 
   // Return non-ok iff some error has been detected.
-  Status status() const override;
+  Status status() const final;
 
   // Return non-ok iff some error happens during IO.
-  IOStatus io_status() const override;
+  IOStatus io_status() const final;
 
   // Finish building the table.  Stops using the file passed to the
   // constructor after this function returns.
   // REQUIRES: Finish(), Abandon() have not been called
-  Status Finish() override;
+  Status Finish() final;
 
   // Indicate that the contents of this builder should be abandoned.  Stops
   // using the file passed to the constructor after this function returns.
   // If the caller is not going to call Finish(), it must call Abandon()
   // before destroying this builder.
   // REQUIRES: Finish(), Abandon() have not been called
-  void Abandon() override;
+  void Abandon() final;
 
   // Number of calls to Add() so far.
-  uint64_t NumEntries() const override;
+  uint64_t NumEntries() const final;
 
-  bool IsEmpty() const override;
+  bool IsEmpty() const final;
 
-  uint64_t PreCompressionSize() const override;
+  uint64_t PreCompressionSize() const final;
 
   // Size of the file generated so far.  If invoked after a successful
   // Finish() call, returns the size of the final generated file.
-  uint64_t FileSize() const override;
+  uint64_t FileSize() const final;
 
   // Estimated size of the file generated so far (based on data blocks, this
   // estimate does not include meta blocks). This is used when FileSize() cannot
   // estimate final SST size, e.g. parallel compression is enabled.
-  uint64_t EstimatedFileSize() const override;
+  uint64_t EstimatedFileSize() const final;
 
   // Estimated tail size of the SST file generated so far. The "tail" refers to
   // all blocks written after data blocks (index + filter).
-  uint64_t EstimatedTailSize() const override;
+  uint64_t EstimatedTailSize() const final;
 
   // Get the size of the "tail" part of a SST file. "Tail" refers to
   // all blocks after data blocks till the end of the SST file.
-  uint64_t GetTailSize() const override;
+  uint64_t GetTailSize() const final;
 
-  bool NeedCompact() const override;
+  bool NeedCompact() const final;
 
   // Get table properties
-  TableProperties GetTableProperties() const override;
+  TableProperties GetTableProperties() const final;
 
   // Get file checksum
-  std::string GetFileChecksum() const override;
+  std::string GetFileChecksum() const final;
 
   // Get file checksum function name
-  const char* GetFileChecksumFuncName() const override;
+  const char* GetFileChecksumFuncName() const final;
 
   void SetSeqnoTimeTableProperties(const SeqnoToTimeMapping& relevant_mapping,
-                                   uint64_t oldest_ancestor_time) override;
+                                   uint64_t oldest_ancestor_time) final;
 
-  uint64_t GetWorkerCPUMicros() const override;
+  uint64_t GetWorkerCPUMicros() const final;
 
  private:
   bool ok() const;
