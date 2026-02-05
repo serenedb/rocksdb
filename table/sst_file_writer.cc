@@ -27,6 +27,9 @@ const std::string ExternalSstFilePropertyNames::kGlobalSeqno =
 
 const size_t kFadviseTrigger = 1024 * 1024;  // 1MB
 
+const uint64_t SstFileWriter::kInternalKeyFooter =
+    (uint64_t{0} << 8) | kTypeValue;
+
 struct SstFileWriter::Rep {
   Rep(const EnvOptions& _env_options, const Options& options,
       Env::IOPriority _io_priority, const Comparator* _user_comparator,
@@ -50,7 +53,7 @@ struct SstFileWriter::Rep {
   }
 
   std::unique_ptr<WritableFileWriter> file_writer;
-  std::unique_ptr<TableBuilder> builder;
+  std::unique_ptr<BlockBasedTableBuilder> builder;
   EnvOptions env_options;
   ImmutableOptions ioptions;
   MutableCFOptions mutable_cf_options;
@@ -72,6 +75,29 @@ struct SstFileWriter::Rep {
   uint64_t next_file_number = 1;
   size_t ts_sz;
   bool strip_timestamp;
+#ifndef NDEBUG
+  std::string largest_user_key;
+#endif
+
+  Status AddByInternalKey(const Slice& internal_key, const Slice& value) {
+    assert(builder);
+    assert(builder->status().ok());
+    assert(internal_key.size() >= kNumInternalBytes);
+    assert(ts_sz == 0);
+
+#ifndef NDEBUG
+    Slice user_key(internal_key.data(),
+                   internal_key.size() - kNumInternalBytes);
+    assert(file_info.num_entries == 0 ||
+           internal_comparator.user_comparator()->Compare(
+               user_key, largest_user_key) > 0);
+    largest_user_key.assign(user_key.data(), user_key.size());
+#endif
+
+    ++file_info.num_entries;
+    builder->Add(internal_key, value);
+    return builder->status();
+  }
 
   Status AddImpl(const Slice& user_key, const Slice& value,
                  ValueType value_type) {
@@ -415,8 +441,11 @@ Status SstFileWriter::Open(const std::string& file_path, Temperature temp) {
 
   // TODO(tec) : If table_factory is using compressed block cache, we will
   // be adding the external sst file blocks into it, which is wasteful.
-  r->builder.reset(r->mutable_cf_options.table_factory->NewTableBuilder(
-      table_builder_options, r->file_writer.get()));
+  // Direct instantiation for BlockBasedTableBuilder to avoid virtual calls
+  const auto* block_based_options =
+      r->mutable_cf_options.table_factory->GetOptions<BlockBasedTableOptions>();
+  r->builder.reset(new BlockBasedTableBuilder(
+      *block_based_options, table_builder_options, r->file_writer.get()));
 
   r->file_info = ExternalSstFileInfo();
   r->file_info.file_path = file_path;
@@ -430,6 +459,11 @@ Status SstFileWriter::Add(const Slice& user_key, const Slice& value) {
 
 Status SstFileWriter::Put(const Slice& user_key, const Slice& value) {
   return rep_->Add(user_key, value, ValueType::kTypeValue);
+}
+
+Status SstFileWriter::PutByInternalKey(const Slice& internal_key,
+                                       const Slice& value) {
+  return rep_->AddByInternalKey(internal_key, value);
 }
 
 Status SstFileWriter::Put(const Slice& user_key, const Slice& timestamp,
