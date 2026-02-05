@@ -53,7 +53,7 @@ struct SstFileWriter::Rep {
   }
 
   std::unique_ptr<WritableFileWriter> file_writer;
-  std::unique_ptr<BlockBasedTableBuilder> builder;
+  std::unique_ptr<TableBuilder> builder;
   EnvOptions env_options;
   ImmutableOptions ioptions;
   MutableCFOptions mutable_cf_options;
@@ -75,9 +75,6 @@ struct SstFileWriter::Rep {
   uint64_t next_file_number = 1;
   size_t ts_sz;
   bool strip_timestamp;
-#ifndef NDEBUG
-  std::string largest_user_key;
-#endif
 
   Status AddByInternalKey(const Slice& internal_key, const Slice& value) {
     assert(builder);
@@ -86,16 +83,24 @@ struct SstFileWriter::Rep {
     assert(ts_sz == 0);
 
 #ifndef NDEBUG
-    Slice user_key(internal_key.data(),
-                   internal_key.size() - kNumInternalBytes);
-    assert(file_info.num_entries == 0 ||
-           internal_comparator.user_comparator()->Compare(
-               user_key, largest_user_key) > 0);
-    largest_user_key.assign(user_key.data(), user_key.size());
+    uint64_t footer = DecodeFixed64(internal_key.data() + internal_key.size() -
+                                    kNumInternalBytes);
+    assert(footer == SstFileWriter::kInternalKeyFooter);
+
+    Slice user_key{internal_key.data(),
+                   internal_key.size() - kNumInternalBytes};
+    if (file_info.num_entries == 0) {
+      file_info.smallest_key.assign(user_key.data(), user_key.size());
+    } else {
+      assert(internal_comparator.user_comparator()->Compare(
+                 user_key, file_info.largest_key) > 0);
+    }
+    file_info.largest_key.assign(user_key.data(), user_key.size());
 #endif
 
+    static_cast<BlockBasedTableBuilder&>(*builder.get())
+        .Add(internal_key, value);
     ++file_info.num_entries;
-    builder->Add(internal_key, value);
     return builder->status();
   }
 
@@ -441,10 +446,8 @@ Status SstFileWriter::Open(const std::string& file_path, Temperature temp) {
 
   // TODO(tec) : If table_factory is using compressed block cache, we will
   // be adding the external sst file blocks into it, which is wasteful.
-  const auto* block_based_options =
-      r->mutable_cf_options.table_factory->GetOptions<BlockBasedTableOptions>();
-  r->builder.reset(new BlockBasedTableBuilder(
-      *block_based_options, table_builder_options, r->file_writer.get()));
+  r->builder.reset(r->mutable_cf_options.table_factory->NewTableBuilder(
+      table_builder_options, r->file_writer.get()));
 
   r->file_info = ExternalSstFileInfo();
   r->file_info.file_path = file_path;
