@@ -20,6 +20,7 @@
 #include "rocksdb/flush_block_policy.h"
 #include "rocksdb/listener.h"
 #include "rocksdb/options.h"
+#include "rocksdb/sst_file_writer.h"
 #include "rocksdb/status.h"
 #include "rocksdb/table.h"
 #include "table/meta_blocks.h"
@@ -118,6 +119,8 @@ class BlockBasedTableBuilder : public TableBuilder {
 
   uint64_t GetWorkerCPUMicros() const final;
 
+  void FlushFromExternalBuffer(BlockFlushData& block_data);
+
  private:
   bool ok() const;
 
@@ -128,7 +131,7 @@ class BlockBasedTableBuilder : public TableBuilder {
 
   // Try to keep some parallel-specific code separate to improve hot code
   // locality for non-parallel case
-  void EmitBlock(std::string& uncompressed,
+  void EmitBlock(const Slice& uncompressed,
                  const Slice& last_key_in_current_block,
                  const Slice* first_key_in_next_block);
   void EmitBlockForParallel(std::string& uncompressed,
