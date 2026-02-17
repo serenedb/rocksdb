@@ -212,7 +212,7 @@ class SstFileWriter {
   // REQUIRES: block_data.buffer contains properly formatted block data
   // REQUIRES: block_data.num_entries is set to the number of entries in the
   // block
-  void FlushFromInternalBuffer(BlockFlushData& block_data);
+  void FlushFromExternalBuffer(BlockFlushData& block_data);
 
  private:
   void InvalidatePageCache(bool closing);

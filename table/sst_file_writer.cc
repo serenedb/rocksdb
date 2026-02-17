@@ -77,9 +77,9 @@ struct SstFileWriter::Rep {
   size_t ts_sz;
   bool strip_timestamp;
 
-  void FlushFromInternalBuffer(BlockFlushData& block_data) {
+  void FlushFromExternalBuffer(BlockFlushData& block_data) {
     static_cast<BlockBasedTableBuilder&>(*builder.get())
-        .FlushFromInternalBuffer(block_data);
+        .FlushFromExternalBuffer(block_data);
   }
 
   Status AddImpl(const Slice& user_key, const Slice& value,
@@ -474,10 +474,10 @@ Status SstFileWriter::DeleteRange(const Slice& begin_key, const Slice& end_key,
   return rep_->DeleteRange(begin_key, end_key, timestamp);
 }
 
-void SstFileWriter::FlushFromInternalBuffer(BlockFlushData& block_data) {
+void SstFileWriter::FlushFromExternalBuffer(BlockFlushData& block_data) {
   Rep* r = rep_.get();
   r->file_info.num_entries += block_data.num_entries;
-  r->FlushFromInternalBuffer(block_data);
+  r->FlushFromExternalBuffer(block_data);
 }
 
 Status SstFileWriter::Finish(ExternalSstFileInfo* file_info) {

@@ -1821,7 +1821,7 @@ uint64_t BlockBasedTableBuilder::GetWorkerCPUMicros() const {
   return rep_->worker_cpu_micros.LoadRelaxed();
 }
 
-void BlockBasedTableBuilder::FlushFromInternalBuffer(
+void BlockBasedTableBuilder::FlushFromExternalBuffer(
     BlockFlushData& block_data) {
   Rep* r = rep_.get();
   assert(rep_->state != Rep::State::kClosed);

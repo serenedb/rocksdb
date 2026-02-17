@@ -118,7 +118,7 @@ class BlockBasedTableBuilder : public TableBuilder {
 
   uint64_t GetWorkerCPUMicros() const final;
 
-  void FlushFromInternalBuffer(BlockFlushData& block_data);
+  void FlushFromExternalBuffer(BlockFlushData& block_data);
 
  private:
   bool ok() const;
