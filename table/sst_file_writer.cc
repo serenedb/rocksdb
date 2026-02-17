@@ -14,7 +14,6 @@
 #include "file/writable_file_writer.h"
 #include "rocksdb/file_system.h"
 #include "rocksdb/table.h"
-#include "table/block_based/block_based_table_builder.h"
 #include "table/sst_file_writer_collectors.h"
 #include "test_util/sync_point.h"
 
@@ -76,35 +75,6 @@ struct SstFileWriter::Rep {
   uint64_t next_file_number = 1;
   size_t ts_sz;
   bool strip_timestamp;
-
-  Status AddByInternalKey(const Slice& internal_key, const Slice& value) {
-    assert(builder);
-    assert(builder->status().ok());
-    assert(internal_key.size() >= kNumInternalBytes);
-    assert(ts_sz == 0);
-
-#ifndef NDEBUG
-    uint64_t footer = DecodeFixed64(internal_key.data() + internal_key.size() -
-                                    kNumInternalBytes);
-    // same is appended in AddImpl via ikey.Set(*,sequence_number, value_type);
-    assert(footer == SstFileWriter::kInternalKeyFooter);
-
-    Slice user_key{internal_key.data(),
-                   internal_key.size() - kNumInternalBytes};
-    if (file_info.num_entries == 0) {
-      file_info.smallest_key.assign(user_key.data(), user_key.size());
-    } else {
-      assert(internal_comparator.user_comparator()->Compare(
-                 user_key, file_info.largest_key) > 0);
-    }
-    file_info.largest_key.assign(user_key.data(), user_key.size());
-#endif
-
-    static_cast<BlockBasedTableBuilder&>(*builder.get())
-        .Add(internal_key, value);
-    ++file_info.num_entries;
-    return builder->status();
-  }
 
   Status AddImpl(const Slice& user_key, const Slice& value,
                  ValueType value_type) {
@@ -463,11 +433,6 @@ Status SstFileWriter::Add(const Slice& user_key, const Slice& value) {
 
 Status SstFileWriter::Put(const Slice& user_key, const Slice& value) {
   return rep_->Add(user_key, value, ValueType::kTypeValue);
-}
-
-Status SstFileWriter::PutByInternalKey(const Slice& internal_key,
-                                       const Slice& value) {
-  return rep_->AddByInternalKey(internal_key, value);
 }
 
 Status SstFileWriter::Put(const Slice& user_key, const Slice& timestamp,
