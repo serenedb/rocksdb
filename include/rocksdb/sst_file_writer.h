@@ -123,15 +123,6 @@ class SstFileWriter {
   // REQUIRES: comparator is *not* timestamp-aware.
   Status Put(const Slice& user_key, const Slice& value);
 
-  // Add a Put using pre-built internal key. This is a fast path that skips
-  // key ordering validation (uses asserts instead of runtime checks).
-  // REQUIRES: internal_key is <user_key | 8-byte footer> where footer =
-  //           PackSequenceAndType(sequence_number, value_type)
-  // REQUIRES: internal_key is after any previously added key according to
-  //           the internal key comparator
-  // REQUIRES: comparator is *not* timestamp-aware
-  Status PutByInternalKey(const Slice& internal_key, const Slice& value);
-
   // Add a Put (key with timestamp, value) to the currently opened file
   // REQUIRES: user_key is after any previously added point (Put/Merge/Delete)
   //           key according to the comparator.
