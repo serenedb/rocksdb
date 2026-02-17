@@ -6,6 +6,7 @@
 #pragma once
 
 #include <memory>
+#include <span>
 #include <string>
 
 #include "advanced_options.h"
@@ -16,6 +17,16 @@
 #include "rocksdb/wide_columns.h"
 
 namespace ROCKSDB_NAMESPACE {
+
+struct BlockFlushData {
+  Slice buffer;
+  Slice last_key_in_current_block;
+  // Empty means this is the last block (no next block exists)
+  Slice first_key_in_next_block;
+  uint64_t num_entries = 0;
+  uint64_t raw_key_size = 0;
+  uint64_t raw_value_size = 0;
+};
 
 class Comparator;
 
@@ -123,15 +134,6 @@ class SstFileWriter {
   // REQUIRES: comparator is *not* timestamp-aware.
   Status Put(const Slice& user_key, const Slice& value);
 
-  // Add a Put using pre-built internal key. This is a fast path that skips
-  // key ordering validation (uses asserts instead of runtime checks).
-  // REQUIRES: internal_key is <user_key | 8-byte footer> where footer =
-  //           PackSequenceAndType(sequence_number, value_type)
-  // REQUIRES: internal_key is after any previously added key according to
-  //           the internal key comparator
-  // REQUIRES: comparator is *not* timestamp-aware
-  Status PutByInternalKey(const Slice& internal_key, const Slice& value);
-
   // Add a Put (key with timestamp, value) to the currently opened file
   // REQUIRES: user_key is after any previously added point (Put/Merge/Delete)
   //           key according to the comparator.
@@ -203,6 +205,15 @@ class SstFileWriter {
 
   // Check if a file with input table property is created by SstFileWriter.
   static bool CreatedBySstFileWriter(const TableProperties&);
+
+  // Flush data from an internal buffer directly to the SST file.
+  // This is an advanced API that allows bypassing the normal key ordering
+  // checks and directly writing pre-formatted block data.
+  // REQUIRES: File is opened
+  // REQUIRES: block_data.buffer contains properly formatted block data
+  // REQUIRES: block_data.num_entries is set to the number of entries in the
+  // block
+  void FlushFromInternalBuffer(BlockFlushData& block_data);
 
  private:
   void InvalidatePageCache(bool closing);

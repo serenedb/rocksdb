@@ -77,33 +77,9 @@ struct SstFileWriter::Rep {
   size_t ts_sz;
   bool strip_timestamp;
 
-  Status AddByInternalKey(const Slice& internal_key, const Slice& value) {
-    assert(builder);
-    assert(builder->status().ok());
-    assert(internal_key.size() >= kNumInternalBytes);
-    assert(ts_sz == 0);
-
-#ifndef NDEBUG
-    uint64_t footer = DecodeFixed64(internal_key.data() + internal_key.size() -
-                                    kNumInternalBytes);
-    // same is appended in AddImpl via ikey.Set(*,sequence_number, value_type);
-    assert(footer == SstFileWriter::kInternalKeyFooter);
-
-    Slice user_key{internal_key.data(),
-                   internal_key.size() - kNumInternalBytes};
-    if (file_info.num_entries == 0) {
-      file_info.smallest_key.assign(user_key.data(), user_key.size());
-    } else {
-      assert(internal_comparator.user_comparator()->Compare(
-                 user_key, file_info.largest_key) > 0);
-    }
-    file_info.largest_key.assign(user_key.data(), user_key.size());
-#endif
-
+  void FlushFromInternalBuffer(BlockFlushData& block_data) {
     static_cast<BlockBasedTableBuilder&>(*builder.get())
-        .Add(internal_key, value);
-    ++file_info.num_entries;
-    return builder->status();
+        .FlushFromInternalBuffer(block_data);
   }
 
   Status AddImpl(const Slice& user_key, const Slice& value,
@@ -465,11 +441,6 @@ Status SstFileWriter::Put(const Slice& user_key, const Slice& value) {
   return rep_->Add(user_key, value, ValueType::kTypeValue);
 }
 
-Status SstFileWriter::PutByInternalKey(const Slice& internal_key,
-                                       const Slice& value) {
-  return rep_->AddByInternalKey(internal_key, value);
-}
-
 Status SstFileWriter::Put(const Slice& user_key, const Slice& timestamp,
                           const Slice& value) {
   return rep_->Add(user_key, timestamp, value, ValueType::kTypeValue);
@@ -501,6 +472,12 @@ Status SstFileWriter::DeleteRange(const Slice& begin_key,
 Status SstFileWriter::DeleteRange(const Slice& begin_key, const Slice& end_key,
                                   const Slice& timestamp) {
   return rep_->DeleteRange(begin_key, end_key, timestamp);
+}
+
+void SstFileWriter::FlushFromInternalBuffer(BlockFlushData& block_data) {
+  Rep* r = rep_.get();
+  r->file_info.num_entries += block_data.num_entries;
+  r->FlushFromInternalBuffer(block_data);
 }
 
 Status SstFileWriter::Finish(ExternalSstFileInfo* file_info) {

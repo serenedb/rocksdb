@@ -1755,7 +1755,7 @@ void BlockBasedTableBuilder::EmitBlockForParallel(
     }
   }
 }
-void BlockBasedTableBuilder::EmitBlock(std::string& uncompressed,
+void BlockBasedTableBuilder::EmitBlock(const Slice& uncompressed,
                                        const Slice& last_key_in_current_block,
                                        const Slice* first_key_in_next_block) {
   Rep* r = rep_.get();
@@ -1819,6 +1819,29 @@ void BlockBasedTableBuilder::WriteBlock(const Slice& uncompressed_block_data,
 
 uint64_t BlockBasedTableBuilder::GetWorkerCPUMicros() const {
   return rep_->worker_cpu_micros.LoadRelaxed();
+}
+
+void BlockBasedTableBuilder::FlushFromInternalBuffer(
+    BlockFlushData& block_data) {
+  Rep* r = rep_.get();
+  assert(rep_->state != Rep::State::kClosed);
+  if (UNLIKELY(!ok())) {
+    return;
+  }
+
+  ++r->props.num_data_blocks;
+
+  r->props.num_entries += block_data.num_entries;
+  r->props.raw_key_size += block_data.raw_key_size;
+  r->props.raw_value_size += block_data.raw_value_size;
+
+  Slice* first_key_in_next_block{};
+  if (!block_data.first_key_in_next_block.empty()) {
+    first_key_in_next_block = &block_data.first_key_in_next_block;
+  }
+  assert(!r->IsParallelCompressionActive());
+  EmitBlock(Slice(block_data.buffer.data(), block_data.buffer.size()),
+            block_data.last_key_in_current_block, first_key_in_next_block);
 }
 
 void BlockBasedTableBuilder::BGWorker(WorkingAreaPair& working_area) {

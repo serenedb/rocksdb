@@ -118,6 +118,8 @@ class BlockBasedTableBuilder : public TableBuilder {
 
   uint64_t GetWorkerCPUMicros() const final;
 
+  void FlushFromInternalBuffer(BlockFlushData& block_data);
+
  private:
   bool ok() const;
 
@@ -128,7 +130,7 @@ class BlockBasedTableBuilder : public TableBuilder {
 
   // Try to keep some parallel-specific code separate to improve hot code
   // locality for non-parallel case
-  void EmitBlock(std::string& uncompressed,
+  void EmitBlock(const Slice& uncompressed,
                  const Slice& last_key_in_current_block,
                  const Slice* first_key_in_next_block);
   void EmitBlockForParallel(std::string& uncompressed,
