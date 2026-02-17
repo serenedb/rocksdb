@@ -17,6 +17,16 @@
 
 namespace ROCKSDB_NAMESPACE {
 
+struct BlockFlushData {
+  Slice buffer;
+  Slice last_key_in_current_block;
+  // Empty means this is the last block (no next block exists)
+  Slice first_key_in_next_block;
+  uint64_t num_entries = 0;
+  uint64_t raw_key_size = 0;
+  uint64_t raw_value_size = 0;
+};
+
 class Comparator;
 
 // ExternalSstFileInfo include information about sst files created
@@ -194,6 +204,15 @@ class SstFileWriter {
 
   // Check if a file with input table property is created by SstFileWriter.
   static bool CreatedBySstFileWriter(const TableProperties&);
+
+  // Flush data from an internal buffer directly to the SST file.
+  // This is an advanced API that allows bypassing the normal key ordering
+  // checks and directly writing pre-formatted block data.
+  // REQUIRES: File is opened
+  // REQUIRES: block_data.buffer contains properly formatted block data
+  // REQUIRES: block_data.num_entries is set to the number of entries in the
+  // block
+  void FlushFromExternalBuffer(BlockFlushData& block_data);
 
  private:
   void InvalidatePageCache(bool closing);

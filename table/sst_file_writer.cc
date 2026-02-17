@@ -14,6 +14,7 @@
 #include "file/writable_file_writer.h"
 #include "rocksdb/file_system.h"
 #include "rocksdb/table.h"
+#include "table/block_based/block_based_table_builder.h"
 #include "table/sst_file_writer_collectors.h"
 #include "test_util/sync_point.h"
 
@@ -75,6 +76,11 @@ struct SstFileWriter::Rep {
   uint64_t next_file_number = 1;
   size_t ts_sz;
   bool strip_timestamp;
+
+  void FlushFromExternalBuffer(BlockFlushData& block_data) {
+    static_cast<BlockBasedTableBuilder&>(*builder.get())
+        .FlushFromExternalBuffer(block_data);
+  }
 
   Status AddImpl(const Slice& user_key, const Slice& value,
                  ValueType value_type) {
@@ -466,6 +472,12 @@ Status SstFileWriter::DeleteRange(const Slice& begin_key,
 Status SstFileWriter::DeleteRange(const Slice& begin_key, const Slice& end_key,
                                   const Slice& timestamp) {
   return rep_->DeleteRange(begin_key, end_key, timestamp);
+}
+
+void SstFileWriter::FlushFromExternalBuffer(BlockFlushData& block_data) {
+  Rep* r = rep_.get();
+  r->file_info.num_entries += block_data.num_entries;
+  r->FlushFromExternalBuffer(block_data);
 }
 
 Status SstFileWriter::Finish(ExternalSstFileInfo* file_info) {
