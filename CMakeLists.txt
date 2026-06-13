@@ -604,8 +604,9 @@ endif()
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-set(USE_COROUTINES 1)
-set(FOLLY_LIBRARIES Folly::folly)
+# SereneDB: coroutine MultiGet pulls in Folly, which we removed from
+# third_party. We don't use the coroutine path, so keep it off.
+set(USE_COROUTINES 0)
 
 if(USE_COROUTINES)
   if(USE_FOLLY OR USE_FOLLY_LITE)

@@ -130,7 +130,9 @@ inline uint32_t Lower32of64(uint64_t v) { return static_cast<uint32_t>(v); }
 
 // std::hash-like interface.
 struct SliceHasher32 {
-  uint32_t operator()(const Slice& s) const { return GetSliceHash(s); }
+  // abseil's flat_hash_map (the non-folly UnorderedMapH backend) requires the
+  // hasher to return size_t; widen the 32-bit hash result to satisfy it.
+  size_t operator()(const Slice& s) const { return GetSliceHash(s); }
 };
 struct SliceNPHasher64 {
   uint64_t operator()(const Slice& s, uint64_t seed = 0) const {
